@@ -339,6 +339,84 @@ details.adv summary{font-size:.95rem}
 .prow .mid small{display:block}
 @media (max-width:420px){.tools .tl span{display:none}.gh .rng{max-width:34%}}
 @media (min-width:760px){.filters{top:96px}}
+
+/* ---- v4.1 ---- */
+.pf .pt{display:flex;flex-direction:column;align-items:center;min-width:0;max-width:100%}
+.hrow1{display:flex;align-items:center;gap:6px}.hrow1>.profseg{flex:1;min-width:0}
+.anc{display:block;width:100%;margin-top:8px;border:1px dashed var(--pri);background:var(--pri2);color:var(--tx);border-radius:10px;padding:6px 10px;font-size:.78rem;text-align:left;line-height:1.35}
+.gh .gi{flex:none}
+.gh .gt{flex:1;min-width:0;display:flex;flex-direction:column}
+.gh .gt b{font-size:.95rem;line-height:1.3;white-space:normal;overflow-wrap:anywhere}
+.gh .gt small{font-size:.72rem;color:var(--mu);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.gh .gt small:empty{display:none}
+.tgrid{display:flex;flex-direction:column}
+.trow{display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:"av nm" "ch ch";gap:6px 9px;align-items:center;padding:9px 2px;border-bottom:1px solid var(--bd)}
+.trow:last-child{border-bottom:0}
+.trow>.av{grid-area:av}.trow>.tl2{grid-area:nm;font-weight:650;font-size:.92rem;min-width:0;line-height:1.3}
+.tch{grid-area:ch;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px}
+.tc{border:1px solid var(--bd);border-left:3px solid var(--rc);background:var(--bg);border-radius:9px;padding:4px 6px;text-align:left;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.tc:hover{border-color:var(--pri)}
+.tc i{font-style:normal;font-size:.66rem;color:var(--mu);font-weight:700}
+.tc b{font-size:.8rem;color:var(--pri);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (min-width:760px){.trow{grid-template-columns:auto minmax(130px,1fr) minmax(0,2.6fr);grid-template-areas:"av nm ch"}}
+@media (min-width:960px){.v-list .gb .tgrid,.v-card .gb .tgrid{grid-column:1/-1}}
+.hidnote{font-size:.8rem;color:var(--mu);text-align:center;margin:10px 0}
+.hidnote button{border:0;background:transparent;color:var(--pri);font-weight:700;text-decoration:underline;font-size:.8rem;padding:2px 4px}
+.tbl td:last-child,.tbl th:last-child{position:sticky;right:0;background:var(--card);box-shadow:-6px 0 8px -6px rgba(0,0,0,.18)}
+.tbl th:last-child{background:var(--pri2);z-index:1}
+@media (max-width:600px){.tbl .cm,.tbl .cp{display:none}.tbl .tn{min-width:110px}.tbl td,.tbl th{padding:7px 6px}}
+#pickBtn{width:100%;margin:0 0 10px;padding:10px}
+.lbl3{display:block;font-size:.8rem;color:var(--mu);font-weight:700;margin:10px 0 5px}
+.pricerow.sm input{font-size:1rem;padding:8px 10px}
+.pnote{margin:4px 0 0}
+#rcBig{margin-top:10px}
+.ratcard{scroll-margin-top:60px}@media (min-width:760px){.ratcard{scroll-margin-top:104px}}
+.pctl{grid-area:need;display:flex;gap:5px;justify-self:end;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+.needq{display:inline-flex;align-items:center;gap:3px;font-size:.75rem;color:var(--mu)}
+.needq input{width:46px;border:1px solid var(--bd);background:var(--card);border-radius:8px;padding:2px 4px;text-align:center;font-size:.8rem;-moz-appearance:textfield}
+.needq input::-webkit-inner-spin-button{-webkit-appearance:none}
+.needq em{font-style:normal}
+.needq.part .need{background:rgba(239,173,29,.16);border-color:#d9a21f;color:#9a6a00}
+.own{border:1px solid var(--bd);background:var(--card);border-radius:999px;padding:3px 9px;font-size:.72rem;font-weight:700;color:var(--mu);white-space:nowrap}
+.own.on{background:rgba(176,107,255,.14);border-color:#b06bff;color:#7b3fd1}
+[data-theme=dark] .own.on{color:#cfa8ff}
+.prow.owned .mid small{color:#7b3fd1}
+.osel{max-width:100%;border:1px solid var(--bd);background:var(--card);border-radius:8px;padding:3px 6px;font-weight:650;font-size:.86rem}
+.pplist{display:flex;flex-direction:column;gap:6px;margin-top:8px}
+.ppr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;text-align:left;border:1px solid var(--bd);background:var(--bg);border-radius:12px;padding:8px 10px}
+.ppr:hover{border-color:var(--pri)}
+.ppr .mid small{white-space:normal}
+.ppr .ppp{color:var(--pri);font-weight:700}
+#ppQ{width:100%;border:1px solid var(--bd);background:var(--card);border-radius:12px;padding:10px 12px;margin-top:6px}
+.chips.pp{flex-wrap:wrap;overflow:visible}
+.pullr{background:var(--bg);border-radius:10px;padding:7px 10px}
+.rpill.sm{display:inline-block;font-size:.66rem;padding:0 6px;margin:2px 0 0 4px;line-height:1.5}
+.ppr .tag{margin-left:2px}
+#ratPill span{margin-left:8px;font-size:.78rem;font-weight:700;opacity:.95}
+@media (max-width:759px){
+  #ratPill{left:10px;right:10px;bottom:70px;border-radius:14px;padding:9px 14px}
+  #ratPill.on{display:flex;justify-content:space-between;align-items:center;gap:10px}
+  #ratPill b{font-size:1.05rem}
+}
+@media (max-width:600px){
+  main{padding:6px 8px 20px}
+  .hero{padding:7px 8px;margin-bottom:6px}
+  .hero .pdesc,.hero .hrow{display:none}
+  .profseg.hp{gap:5px}
+  .profseg.hp .pf{flex-direction:row;justify-content:flex-start;gap:5px;padding:5px 6px;border-radius:12px;text-align:left}
+  .profseg.hp .pf em{font-size:1.05rem}
+  .profseg.hp .pf .pt{align-items:flex-start}
+  .profseg.hp .pf b{font-size:.8rem}
+  .profseg.hp .pf small{font-size:.64rem}
+  .hero .anc{margin-top:6px;padding:4px 8px;font-size:.72rem}
+  .filters{padding-top:3px;margin:0 -8px;padding-left:8px;padding-right:8px}
+  .sbox input{padding:7px 12px 7px 34px}
+  .chips{padding:5px 0 3px}
+  .chip{padding:4px 10px}
+  .cntrow{margin:4px 2px 5px}
+  .tools select{padding:3px 6px}.tl{padding:3px 8px}.tools .vsw button{padding:3px 9px}
+  .gh{padding:7px 10px}
+}
 </style>
 </head>
 <body>
@@ -367,19 +445,25 @@ details.adv summary{font-size:.95rem}
   <section id="pack" class="page">
     <div class="pgrid">
       <div class="pcol">
-        <div class="card ratcard" id="ratCard"></div>
+        <div class="card ratcard" id="ratCard">
+          <div class="rc-h"><h3 id="st1"></h3><button class="info" data-act="profinfo" aria-label="info">ⓘ</button></div>
+          <div id="rcProf"></div>
+          <label class="lbl3" id="st3" for="pPrice"></label>
+          <div class="pricerow"><input id="pPrice" type="number" min="0" step="any" inputmode="decimal"><button class="pick" id="pCurBtn" data-act="pcur"></button></div>
+          <p class="hint pnote" id="priceNote" hidden></p>
+          <div id="rcBig"></div>
+          <p class="rc-o" id="rcOth" hidden></p>
+          <div id="rcAnc"></div>
+        </div>
         <div class="card">
           <h3 id="st2"></h3>
+          <button class="btn pri" id="pickBtn" data-act="pickpack" hidden></button>
           <div class="lbl2" id="quickLbl"></div>
           <div class="quick" id="quick"></div>
           <input id="ps" type="search" autocomplete="off">
           <div id="pres"></div>
           <div id="prows"></div>
           <div class="prfoot"><p class="hint" id="needHint"></p><button class="btn sm" id="clearPack" data-act="clearPack"></button></div>
-        </div>
-        <div class="card">
-          <h3 id="st3"></h3>
-          <div class="pricerow"><input id="pPrice" type="number" min="0" step="any" inputmode="decimal"><button class="pick" id="pCurBtn" data-act="pcur"></button></div>
         </div>
       </div>
       <div class="pcol pcol2">
@@ -398,6 +482,6 @@ details.adv summary{font-size:.95rem}
 <div id="sheetWrap" class="sheetwrap"><div class="backdrop"></div><div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div><div id="sheetBody"></div></div></div>
 <div id="guide" class="guide"></div>
 <div id="toast"></div>
-<script type="module" src="app.js"></script>
+<script type="module" src="app.js?v=4.1"></script>
 </body>
 </html>

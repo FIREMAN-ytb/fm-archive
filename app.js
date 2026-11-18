@@ -1,4 +1,5 @@
-import { I18N } from './i18n.js';
+import { I18N } from './i18n.js?v=4.1';
+const VER = '4.1';
 
 /* ---------------- constants ---------------- */
 const LANGS = ['tw','cn','zh','en','jp','kr','th','vi'];
@@ -11,23 +12,33 @@ const CICON = Object.fromEntries(CATS);
 const CORDER = Object.fromEntries(CATS.map((c, i) => [c[0], i]));
 const GORDER = {
   cur: ['base','coin','ticket','point'], tic: ['pull','sel'], skill: ['bd','note','secret'],
-  gear: ['bp','gbp','eq','stone','wpn'], grow: ['rep','mat'], gift: ['g4','g3','g2','g1'], box: ['pack','sel','rand'],
+  gear: ['bp','gbp','eq','stone','wpn'], grow: ['rep','mat'], gift: ['g4','g3','g2','g1'], box: ['pack','sel','fix','rand'],
   furn: ['Prop','Table','Chair','Bed','Closet','HomeAppliance','WallDecoration','FloorDecoration','Floor','Wallpaper','Background','Trophy','FurnitureEtc'],
 };
 const GICON = {'cur.base':'💎','cur.coin':'🪙','cur.ticket':'🎟️','cur.point':'🔆','tic.pull':'🎫','tic.sel':'🌟','skill.bd':'💿','skill.note':'📘','skill.secret':'📕',
-  'gear.bp':'📐','gear.gbp':'📐','gear.eq':'🛡️','gear.stone':'🔷','gear.wpn':'🔩','grow.rep':'📄','grow.mat':'🧪','box.pack':'🗓️','box.sel':'🎁','box.rand':'🎲',
+  'gear.bp':'📐','gear.gbp':'📐','gear.eq':'🛡️','gear.stone':'🔷','gear.wpn':'🔩','grow.rep':'📄','grow.mat':'🧪','box.pack':'🗓️','box.sel':'🎁','box.rand':'🎲','box.fix':'📦','gift.g4':'💝','gift.g3':'🎀','gift.g2':'🎀','gift.g1':'🎀',
   'furn.Prop':'🪴','furn.Table':'🍽️','furn.Chair':'🪑','furn.Bed':'🛏️','furn.Closet':'🗄️','furn.HomeAppliance':'📺','furn.WallDecoration':'🖼️','furn.FloorDecoration':'🧸',
   'furn.Floor':'🟫','furn.Wallpaper':'🧱','furn.Background':'🌄','furn.Trophy':'🏆','furn.FurnitureEtc':'📦'};
-const icon = it => it.k === 'C3' ? '💎' : it.k === 'C5' ? '⚡' : it.k === 'C1' ? '💰' : GICON[it.c + '.' + it.g] || CICON[it.c] || '•';
+const OOP_E = ['🏺','📿','🗿','🔮','💍','🪬','🧭','⚱️','🗝️','📜','🪔','🧿','💠','🔔','🪆','🎐','🧩','🪞','⚙️','🪙'];
+const SCH_E = {Gehenna:'😈',Trinity:'🕊️',Millennium:'💻',Abydos:'🏜️',Hyakkiyako:'🏮',Shanhaijing:'🐉',RedWinter:'❄️',Valkyrie:'🚓',Arius:'🥀',SRT:'🐰',WildHunt:'🎨',Highlander:'🚂',Tokiwadai:'🔌',Sakugawa:'🏫',Odyssey:'⚓',ETC:'✨',eligma:'🔹'};
+const EV_E = ['🎪','🎡','🎢','🎠','🎭','🎆','🏖️','🌸','🎃','🎄','🍫','🏮','🎐','⛩️','🚀','🌊','🍡','🎻'];
+const icon = it => {
+  if (it.k === 'C3') return '💎'; if (it.k === 'C5') return '⚡'; if (it.k === 'C1') return '💰';
+  if (it.c === 'oop') return OOP_E[(parseInt(String(it.g).slice(1)) || 0) % OOP_E.length];
+  if (it.c === 'eleph') return SCH_E[it.g] || '✨';
+  if (it.c === 'event') { const v = rv(it), m = v && v[2]; return m === 'ecoin' ? '🪙' : m === 'col' ? '🏷️' : '🔖'; }
+  return GICON[it.c + '.' + it.g] || CICON[it.c] || '•';
+};
+const evIcon = g => g === 'misc' ? '🎪' : EV_E[(parseInt(String(g).slice(1)) || 0) % EV_E.length];
 const POPULAR = ['twd','usd','jpy','krw','cny','hkd','eur','gbp','thb','vnd','sgd','myr','php','idr','aud','cad','inr','brl','mxn'];
 const FX_URL = 'https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json/+esm';
 /* Taiwan iOS prices (NT$) — profiles and the comparison ladder */
 const REF = [
   {id:'newbie', p:500, ap:0, twd:33},
-  {id:'half', p:776, ap:0, twd:100},
-  {id:'ap2w', p:176, ap:2100, twd:100},
-  {id:'month', p:1592, ap:0, twd:230},
-  {id:'apw', p:128, ap:1120, twd:65},
+  {id:'half', p:776, ap:0, twd:100, k:'I90000101'},
+  {id:'ap2w', p:176, ap:2100, twd:100, k:'I90000102'},
+  {id:'month', p:1592, ap:0, twd:230, k:'I90000100'},
+  {id:'apw', p:128, ap:1120, twd:65, k:'I90080111'},
   {id:'direct', p:6600, ap:0, twd:2190},
 ];
 const LITE = (100 + 230) / (776 + 1592), WHALE = 2190 / 6600;
@@ -35,6 +46,45 @@ const PROFS = ['f2p','lite','whale'];
 const PICON = {f2p:'🐢', lite:'🌙', whale:'⚡', custom:'⚙️'};
 const DAILY_P = [240, 465, 1065];
 const QUICK = [['C3',100],['C5',120],['C1',100000],['I6998',1],['I6999',1]];
+/* player words → items (search aliases; work in every UI language) */
+const RX_AP = /(^|[^A-Za-z])AP([^A-Za-z]|$)/;
+const ALIAS = [
+  [['半月卡','半月','half-month','half month','ハーフ','보름'], it => /^I900001(01|08)$/.test(it.k)],
+  [['月卡','月卡包','monthly card','monthly','月パス','マンスリー','월정액','월간','รายเดือน','thẻ tháng','gói tháng'], it => /^I900001(00|01|07|08)$/.test(it.k)],
+  [['體力包','体力包','ap包','ap pack','スタミナパック','ap 패키지','แพ็ก ap'], it => it.c === 'box' && it.g === 'pack' && RX_AP.test(it.n[3] || '')],
+  [['體力','体力','行動力','行动力','stamina','energy','スタミナ','행동력','สตามินา','thể lực'], it => it.k === 'C5' || RX_AP.test(it.n[3] || '')],
+  [['石頭','石头','鑽石','钻石','鑽','钻','青石','寶石','宝石','gem','gems','pyro','석','청휘','เพชร','đá'], it => it.k === 'C3' || /青輝石/.test(it.n[0])],
+  [['十連','十连','10連','10连','10抽','十抽','10-pull','ten pull','10연'], it => it.c === 'tic' && /10/.test(it.n[3] || it.n[0])],
+  [['單抽','单抽','1抽','single pull'], it => it.c === 'tic' && it.g === 'pull' && !/10/.test(it.n[3] || it.n[0])],
+  [['抽','招募','票','券','ticket','gacha','pull','ガチャ','チケット','모집','뽑기','ตั๋ว','vé'], it => it.c === 'tic' || (it.c === 'cur' && it.g === 'point')],
+  [['碎片','神名','shard','shards','eleph','エレフ','엘레프','เอลเลฟ'], it => it.c === 'eleph'],
+  [['技能書','技能书','書','书','光碟','光盘','筆記','笔记','bd','blu-ray','note','notes','skill book','スキル本','ノート','스킬북','노트','ตำรา'], it => it.c === 'skill'],
+  [['禮物','礼物','禮品','好感','gift','gifts','プレゼント','贈り物','선물','ของขวัญ','quà'], it => it.c === 'gift'],
+  [['家具','furniture','가구','เฟอร์นิเจอร์','nội thất'], it => it.c === 'furn'],
+  [['錢','钱','金幣','金币','信用','credit','credits','gold','クレジット','크레딧','เครดิต','tín dụng'], it => it.k === 'C1'],
+  [['經驗','经验','報告','报告','exp','report','レポート','보고서','รายงาน'], it => it.c === 'grow' && it.g === 'rep'],
+  [['裝備','装备','設計圖','设计图','equipment','gear','blueprint','装備','設計図','장비','설계도'], it => it.c === 'gear'],
+  [['古物','歐帕茲','欧帕兹','oopart','ooparts','artifact','artifacts','オーパーツ','오파츠'], it => it.c === 'oop'],
+  [['通行證','通行证','battle pass','pass','パス','패스','พาส'], it => it.c === 'box' && it.g === 'pack' && (rv(it) || [])[2] === 'pass'],
+  [['自選','自选','選擇','选择','selector','choice','選択','선택'], it => (it.c === 'box' && it.g === 'sel') || (it.c === 'tic' && it.g === 'sel')],
+];
+function aliasPred(q) {
+  let best = 0, fs = [];
+  for (const [ws, f] of ALIAS) {
+    let w = 0;
+    for (const x of ws) { const lx = x.toLowerCase(); if ((lx.length === 1 ? q === lx : q.includes(lx)) && lx.length > w) w = lx.length; }
+    if (!w) continue;
+    if (w > best) { best = w; fs = [f]; } else if (w === best) fs.push(f);
+  }
+  return fs.length ? {w: best, f: it => fs.some(f => f(it))} : null;
+}
+/* text matches first; player-word aliases only when the query is (almost) just that word, or nothing matched */
+function searchItems(q, keep) {
+  const txt = DATA.items.filter(it => keep(it) && it.s.includes(q)), ap = aliasPred(q);
+  if (!ap || !(ap.w >= q.length - 1 || !txt.length)) return {txt, extra: [], ap: null};
+  const seen = new Set(txt.map(it => it.k));
+  return {txt, extra: DATA.items.filter(it => keep(it) && !seen.has(it.k) && ap.f(it)), ap};
+}
 const THEMES = ['auto','blue','dark','pink','mint'];
 const FS = {s:13.5, m:15, l:16.5, xl:18.5};
 const TIERED = new Set(['oop','skill','grow']);
@@ -48,7 +98,7 @@ const rd0 = k => { try { return JSON.parse(localStorage.getItem(k)); } catch (e)
 const load = (k, d, old) => { const v = rd0(k) ?? (old ? rd0(old) : null); return v && typeof v === 'object' ? Object.assign(d, v) : d; };
 const save = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
 const guessLang = () => { const l = (navigator.language || '').toLowerCase(); if (l.startsWith('zh')) return /cn|sg|hans/.test(l) ? 'zh' : 'tw'; return {ja:'jp',ko:'kr',th:'th',vi:'vi',en:'en'}[l.slice(0, 2)] || 'tw'; };
-const DEF = {prof:'lite', dailyAP:465, camp:1, apRate:0.25, cAmt:6600, cPrice:2190, cCur:'twd', region:1, mode:'acq'};
+const DEF = {prof:'lite', dailyAP:465, camp:1, apRate:0.25, cAmt:6600, cPrice:2190, cCur:'twd', region:1, mode:'acq', aPrice:0, aCur:'', showCol:0, showKr:0};
 const st = load('ba4_state', {lang:guessLang(), cur:null, curManual:false, cur2:'', cat:'cur', sort:0, view:'list', viewManual:0, theme:'auto', fs:'m',
   cols:{pyro:1, ap:0, method:1, meta:1, demand:0}, open:{}, seenGuide:0, ...DEF});
 const custom = load('ba4_custom', {}, 'ba2_custom');
@@ -103,10 +153,12 @@ function curName(c) {
 }
 const rate = c => FX.usd[c];
 /* NT$ per Pyroxene for a profile (f2p borrows the monthly-card rate whenever money is needed) */
+/* regional factor: the user's own monthly-card price vs Taiwan's NT$230 (1 when not set) */
+function regF() { const p = +st.aPrice, r = rate(st.aCur || st.cur), tw = rate('twd'); return p > 0 && r && tw ? p / r * tw / 230 : 1; }
 function twdPP(prof = st.prof) {
-  if (prof === 'whale') return WHALE;
-  if (prof === 'custom') { const r = rate(st.cCur), tw = rate('twd'); return r && tw && st.cAmt > 0 ? st.cPrice / r * tw / st.cAmt : LITE; }
-  return LITE;
+  if (prof === 'whale') return WHALE * regF();
+  if (prof === 'custom') { const r = rate(st.cCur), tw = rate('twd'); return r && tw && st.cAmt > 0 ? st.cPrice / r * tw / st.cAmt : LITE * regF(); }
+  return LITE * regF();
 }
 const twdTo = (x, code = st.cur) => { const tw = rate('twd'), c = rate(code); return tw && c ? x / tw * c : 0; };
 const cpp = (code = st.cur, prof = st.prof) => twdTo(twdPP(prof), code);
@@ -169,7 +221,7 @@ function profSub(p) {
 }
 function profSeg(cls = '') {
   const ps = st.prof === 'custom' ? [...PROFS, 'custom'] : PROFS;
-  return `<div class="profseg${ps.length > 3 ? ' c4' : ''} ${cls}" role="radiogroup">${ps.map(p => `<button class="pf${st.prof === p ? ' on' : ''}" data-act="prof" data-v="${p}" role="radio" aria-checked="${st.prof === p}"><em>${PICON[p]}</em><b>${esc(profName(p))}</b><small>${esc(profSub(p))}</small></button>`).join('')}</div>`;
+  return `<div class="profseg${ps.length > 3 ? ' c4' : ''} ${cls}" role="radiogroup">${ps.map(p => `<button class="pf${st.prof === p ? ' on' : ''}" data-act="prof" data-v="${p}" role="radio" aria-checked="${st.prof === p}"><em>${PICON[p]}</em><span class="pt"><b>${esc(profName(p))}</b><small>${esc(profSub(p))}</small></span></button>`).join('')}</div>`;
 }
 function profDesc() {
   if (st.prof === 'f2p') return t('profD_f2p', {ap: fmtNum(st.dailyAP), r: ar()});
@@ -186,18 +238,21 @@ function renderChrome() {
     if (i === 1) a.querySelector('i').textContent = pack.items.length || '';
   });
   const fx = (FX.live ? '🟢 ' : '🟠 ') + t(FX.live ? 'fxLive' : 'fxSnap', {d: FX.date || '—'});
-  $('#hero').innerHTML = `${profSeg()}<p class="pdesc">${esc(profDesc())}</p>
+  $('#hero').innerHTML = `<div class="hrow1">${profSeg('hp')}<button class="info" data-act="profinfo" aria-label="info">ⓘ</button></div><p class="pdesc">${esc(profDesc())}</p>
 <div class="hrow"><span class="pp">${esc(isF2P() ? t('apLine', {r: ar()}) : t('per', {x: fmtCur(cpp())}) + (c2on() ? ' ≈ ' + fmtCur(cpp(st.cur2), st.cur2) : ''))}</span>
-<span class="pill fx">${esc(fx)}</span><button class="info" data-act="profinfo" aria-label="info">ⓘ</button></div>`;
+<span class="pill fx">${esc(fx)}</span></div>${ancNote()}`;
 }
+const ancNote = () => st.cur !== 'twd' && !(+st.aPrice > 0) && st.prof !== 'custom' && !isF2P() ? `<button class="anc" data-act="profinfo">💡 ${esc(t('anchorHint', {cur: st.cur.toUpperCase()}))}</button>` : '';
 const c2on = () => st.cur2 && st.cur2 !== st.cur && rate(st.cur2);
 
 /* ---------------- list page ---------------- */
 const inRegion = it => it.rel[st.region];
-function favCount() { return DATA.items.filter(it => fav[it.k] && inRegion(it)).length; }
+const isColZero = it => { const v = rv(it); return !!v && v[2] === 'col' && !v[0] && !v[1]; };
+const shown = it => inRegion(it) && (st.showKr || !it.kr) && (st.showCol || !isColZero(it));
+function favCount() { return DATA.items.filter(it => fav[it.k] && shown(it)).length; }
 function renderFilters() {
   $('#q').placeholder = t('search');
-  const cnt = {}; for (const it of DATA.items) if (inRegion(it)) cnt[it.c] = (cnt[it.c] || 0) + 1;
+  const cnt = {}; for (const it of DATA.items) if (shown(it)) cnt[it.c] = (cnt[it.c] || 0) + 1;
   const fc = favCount();
   if (st.cat === 'fav' && !fc) st.cat = 'cur';
   const ch = $('#chips'), sl = ch.scrollLeft;
@@ -238,8 +293,9 @@ function glabel(c, g, items) {
   return tl('subs', c + '.' + g);
 }
 function groupsOf(c) {
+  if (c === 'oop') { const items = DATA.items.filter(it => it.c === c && shown(it)); return items.length ? [{g: 'all', items, label: catLabel(c)}] : []; }
   const m = new Map();
-  for (const it of DATA.items) if (it.c === c && inRegion(it)) { if (!m.has(it.g)) m.set(it.g, []); m.get(it.g).push(it); }
+  for (const it of DATA.items) if (it.c === c && shown(it)) { if (!m.has(it.g)) m.set(it.g, []); m.get(it.g).push(it); }
   let gs = [...m.entries()].map(([g, items]) => ({g, items, label: glabel(c, g, items)}));
   const C = coll();
   if (c === 'event') { const ek = g => { const n = +g.slice(1) || 0; return g === 'misc' ? 3 : n < 10000 ? 0 : n < 20000 ? 1 : 2; }; gs.sort((a, b) => ek(a.g) - ek(b.g) || (+b.g.slice(1) || 0) - (+a.g.slice(1) || 0)); }
@@ -284,9 +340,20 @@ function methodShort(it, v) {
 function tags(v) {
   if (!v) return '';
   if (v.m === 'custom') return `<span class="tag">${esc(t('customTag'))}</span>`;
-  if (v.m === 'rough' || v.m === 'group' || (v.m === 'ticket' && !(v.x && v.x.loot !== undefined)) || (v.x && (v.x.partial || v.x.proxy))) return `<span class="tag rough">${esc(t('rough'))}</span>`;
+  if (v.m === 'rough' || v.m === 'group' || (v.m === 'ticket' && !(v.x && v.x.loot !== undefined)) || (v.x && (v.x.partial || v.x.proxy || v.x.rough))) return `<span class="tag rough">${esc(t('rough'))}</span>`;
   if (v.m === 'col') return `<span class="tag col">${esc(t('colTag'))}</span>`;
   return '';
+}
+let PBK = null;   /* pack item key → official pack (for the ratio pill on list rows) */
+function packOfKey(k) {
+  if (!PBK) { PBK = {}; for (const P of (DATA.meta.packs || [])) if (P.key && (!PBK[P.key] || (P.on || [])[1] > (PBK[P.key].on || [])[1])) PBK[P.key] = P; }
+  return PBK[k];
+}
+function packPill(it, v) {
+  const P = v && packOfKey(it.k); if (!P) return '';
+  const tw = packPriceTWD(P); if (!tw) return '';
+  const pf = isF2P() ? 'lite' : st.prof, r = v.p * twdPP(pf) / tw;
+  return `<span class="rpill sm v${vIdx(r)}" title="${esc(profName(pf))}">${PICON[pf]} ${r.toFixed(2)}×</span>`;
 }
 function priceCells(v, it) {
   if (!v) return `<span class="nov">${esc(t('nov'))}</span>`;
@@ -296,7 +363,7 @@ function priceCells(v, it) {
   else { if (c2on()) sub.push(fmtCur(P * cpp(st.cur2), st.cur2)); if (st.cols.ap) sub.push(fmtNum(apOf(P)) + ' AP'); }
   if (st.cols.pyro) sub.push(fmtNum(P) + ' 💎');
   if (sub.length) s += `<small>${esc(sub.join(' · '))}</small>`;
-  return s + tags(v);
+  return s + tags(v) + (it.collab ? `<span class="tag">${esc(t('collabTag'))}</span>` : '') + packPill(it, v);
 }
 function rowHTML(it) {
   const v = val(it);
@@ -320,9 +387,9 @@ function tableHTML(arr) {
   let h = `<table class="tbl"><thead><tr><th></th><th>${esc(L.sort[3])}</th><th class="num">${f2p ? 'AP' : esc(st.cur.toUpperCase())}</th>`;
   if (f2p) h += `<th class="num">${esc(t('dayU'))}</th>`;
   if (!f2p && c2on()) h += `<th class="num">${esc(st.cur2.toUpperCase())}</th>`;
-  if (st.cols.pyro) h += `<th class="num">💎</th>`;
+  if (st.cols.pyro) h += `<th class="num cp">💎</th>`;
   if (!f2p && st.cols.ap) h += `<th class="num">AP</th>`;
-  if (st.cols.method) h += `<th>${esc(L.cols.method)}</th>`;
+  if (st.cols.method) h += `<th class="cm">${esc(L.cols.method)}</th>`;
   h += `<th></th></tr></thead><tbody>`;
   for (const it of arr) {
     const v = val(it), u = unitOf(it), P = v ? v.p * u : 0;
@@ -330,9 +397,9 @@ function tableHTML(arr) {
 <td class="tn"><span class="dot r${it.r || 1}"></span>${esc(nm(it))}${u > 1 ? ' ×' + fmtNum(u) : ''}${tags(v)}</td><td class="num"><b>${v ? esc(mainPrice(P)) : '—'}</b></td>`;
     if (f2p) h += `<td class="num">${v ? fmtDays(daysOf(P)) : '—'}</td>`;
     if (!f2p && c2on()) h += `<td class="num">${v ? fmtCur(P * cpp(st.cur2), st.cur2) : '—'}</td>`;
-    if (st.cols.pyro) h += `<td class="num">${v ? fmtNum(P) : '—'}</td>`;
+    if (st.cols.pyro) h += `<td class="num cp">${v ? fmtNum(P) : '—'}</td>`;
     if (!f2p && st.cols.ap) h += `<td class="num">${v ? fmtNum(apOf(P)) : '—'}</td>`;
-    if (st.cols.method) h += `<td>${v ? esc(methodShort(it, v)) : ''}</td>`;
+    if (st.cols.method) h += `<td class="cm">${v ? esc(methodShort(it, v)) : ''}</td>`;
     h += `<td><button class="plus sm" data-act="add" data-k="${it.k}" aria-label="+">＋</button></td></tr>`;
   }
   return h + `</tbody></table>`;
@@ -355,25 +422,53 @@ function renderList() {
   const box = $('#results'); box.className = 'res v-' + st.view;
   const q = $('#q').value.trim().toLowerCase();
   if (q || st.cat === 'fav') {
-    const arr = sortArr(DATA.items.filter(it => inRegion(it) && (q ? it.s.includes(q) : fav[it.k])), null);
+    let arr, hit;
+    if (q) { const S = searchItems(q, shown); arr = sortArr(S.txt, null).concat(sortArr(S.extra, null)); hit = it => it.s.includes(q) || (S.ap && S.ap.f(it)); }
+    else { hit = it => fav[it.k]; arr = sortArr(DATA.items.filter(it => shown(it) && hit(it)), null); }
     const key = q ? 'q:' + q : 'fav', n = SHOWN.get(key) || 60;
     $('#count').textContent = (q ? t('searchAll') + ' · ' : '') + t('count', {n: arr.length});
-    box.innerHTML = arr.length ? `<div class="flat">${itemsHTML(arr.slice(0, n))}${moreBtn(key, arr.length - n)}</div>` : `<p class="empty">${esc(t('noResult'))}</p>`;
+    box.innerHTML = (arr.length ? `<div class="flat">${itemsHTML(arr.slice(0, n))}${moreBtn(key, arr.length - n)}</div>` : `<p class="empty">${esc(t('noResult'))}</p>`) + hidNotes(it => hit(it));
     return;
   }
   const c = st.cat, gs = groupsOf(c);
   const total = gs.reduce((s, x) => s + x.items.length, 0);
-  $('#count').textContent = t('countG', {n: total, g: gs.length});
+  $('#count').textContent = t('countG', {n: total, g: c === 'oop' ? tierRows('oop', gs[0] ? gs[0].items : []).length : gs.length});
   box.innerHTML = gs.map(({g, items, label}) => {
     const open = isOpen(c, g, gs), key = c + '|' + g;
     let body = '';
     if (open) {
-      const arr = sortArr(items.slice(), c), n = SHOWN.get(key) || (st.view === 'table' ? 20 : PAGE);
-      body = `<div class="gb">${itemsHTML(arr.slice(0, n))}${moreBtn(key, arr.length - n)}</div>`;
+      if (TGRID(c, g) && st.view !== 'table') body = `<div class="gb">${tierHTML(c, items)}</div>`;
+      else {
+        const arr = sortArr(items.slice(), c), n = SHOWN.get(key) || (st.view === 'table' ? 20 : PAGE);
+        body = `<div class="gb">${itemsHTML(arr.slice(0, n))}${moreBtn(key, arr.length - n)}</div>`;
+      }
     }
-    const gi = c === 'event' || c === 'oop' || c === 'eleph' ? CICON[c] : (GICON[c + '.' + g] || CICON[c]);
-    return `<section class="grp${open ? ' open' : ''}"><button class="gh" data-act="grp" data-v="${esc(g)}" aria-expanded="${open}"><span class="chev">▶</span><span>${gi}</span><b>${esc(label)}</b><span class="rng">${esc(rangeTxt(items))}</span><span class="gn">${items.length}</span></button>${body}</section>`;
-  }).join('');
+    const gi = c === 'event' ? evIcon(g) : c === 'eleph' ? (SCH_E[g] || CICON[c]) : (GICON[c + '.' + g] || CICON[c]);
+    return `<section class="grp${open ? ' open' : ''}"><button class="gh" data-act="grp" data-v="${esc(g)}" aria-expanded="${open}"><span class="chev">▶</span><span class="gi">${gi}</span><span class="gt"><b>${esc(label)}</b><small>${esc(rangeTxt(items))}</small></span><span class="gn">${items.length}</span></button>${body}</section>`;
+  }).join('') + hidNotes(it => it.c === c);
+}
+/* hidden-by-default items (worth-0 collectibles, Korea-only) with a show/hide switch */
+function hidNotes(scope) {
+  let nc = 0, nk = 0;
+  for (const it of DATA.items) if (inRegion(it) && scope(it)) { if (isColZero(it)) nc++; if (it.kr) nk++; }
+  const one = (k, n, a, b) => n ? `<p class="hidnote">${esc(t(st[k] ? b : a, {n}))} <button data-act="tog" data-k="${k}">${esc(t(st[k] ? 'hideT' : 'showT'))}</button></p>` : '';
+  return one('showCol', nc, 'hidCol', 'shownCol') + one('showKr', nk, 'hidKr', 'shownKr');
+}
+/* artifacts (by family) and BD / notes (by school): one compact row with T1–T4 */
+const TGRID = (c, g) => c === 'oop' || (c === 'skill' && (g === 'bd' || g === 'note'));
+function tierRows(c, items) {
+  const m = new Map();
+  for (const it of items) { const key = c === 'oop' ? it.g : (it.sc || '?'); if (!m.has(key)) m.set(key, []); m.get(key).push(it); }
+  const rows = [...m.entries()].map(([key, arr]) => ({key, arr: arr.sort((a, b) => a.r - b.r || a.i - b.i)}));
+  if (c === 'oop') rows.sort((a, b) => (+a.key.slice(1) || 0) - (+b.key.slice(1) || 0));
+  else { const C = coll(); rows.sort((a, b) => C.compare(schoolName(a.key), schoolName(b.key))); }
+  return rows;
+}
+function tierHTML(c, items) {
+  return `<div class="tgrid">${tierRows(c, items).map(({key, arr}) => {
+    const top = arr[arr.length - 1], label = c === 'oop' ? nm(top) : schoolName(key);
+    return `<div class="trow"><span class="av sm r${top.r || 1}">${c === 'skill' ? (SCH_E[key] || icon(top)) : icon(top)}</span><b class="tl2">${esc(label)}</b><div class="tch">${arr.map(it => { const v = val(it); return `<button class="tc r${it.r || 1}" data-act="open" data-k="${it.k}" title="${esc(nm(it))}"><i>T${it.r}${fav[it.k] ? ' ★' : ''}</i><b>${v ? esc(mainPrice(v.p * unitOf(it))) : '—'}</b></button>`; }).join('')}</div></div>`;
+  }).join('')}</div>`;
 }
 
 /* ---------------- explanation ---------------- */
@@ -395,11 +490,14 @@ function explain(it) {
     case 'random': out.push(t('exRandom', {n: x.n})); break;
     case 'group': out.push(t('exGroup')); break;
     case 'eligma': out.push(t('exEligma', {n: x.n})); break;
-    case 'recipe': out.push(t('exRecipe')); break;
+    case 'recipe': out.push(t(x.all || it.g === 'fix' ? 'exAll' : 'exRecipe')); break;
     case 'pull': out.push(t('exPull', {n: x.n || 1, p: fmtNum(p)})); break;
     case 'g3': out.push(t('exG3', {p: fmtNum(p)})); break;
-    case 'spark': out.push(t('exSpark', {p: fmtNum(p)})); out.push(t('exSparkOwned')); break;
-    case 'point': out.push(t('exPoint')); break;
+    case 'spark': out.push(t('exSpark', {p: fmtNum(p)})); if (!x.own) out.push(t('exSparkOwned')); break;
+    case 'sel3': out.push(t('exSel3', {p: fmtNum(p)})); break;
+    case 'point': out.push(x.sel3 ? t('exPointS', {s: fmtNum(x.sel3)}) : t('exPoint')); break;
+    case 'bounty': out.push(t('exBounty', {l: fmtNum(x.loot), c: fmtNum(x.cap), f: fx2(x.f), p: fmtNum(x.list)})); break;
+    case 'ubp': out.push(t('exUbp', {n: fmtNum(x.n), bp: fmtNum(x.bp), c: fmtNum(x.chain)})); break;
     case 'monthly': out.push(t('exMonthly', {d: x.days || 30}));
       if (x.tix) out.push(t('exTix', {t: Object.entries(x.tix).map(([k, n]) => (BYK[k] ? nm(BYK[k]) : k) + ' ×' + fmtNum(n)).join('、')}));
       break;
@@ -415,7 +513,7 @@ function explain(it) {
       else if (x.as && BYK[x.as]) out.push(t('exSame', {as: nm(BYK[x.as])}));
       else out.push(t('exRough'));
       break;
-    case 'ticket': out.push(x.loot !== undefined ? t('exLoot', {l: fmtNum(x.loot), ap: fmtNum(x.ap || 0)}) : t('exTicket')); break;
+    case 'ticket': out.push(x.loot !== undefined ? t(x.gross ? 'exLootG' : 'exLoot', {l: fmtNum(x.loot), ap: fmtNum(x.ap || 0)}) : t('exTicket')); break;
     case 'pass': if (x.up) out.push(t('exPassUp', {lvp: fmtNum(x.lvp), lv: fmtNum(x.lv)})); else { out.push(t('exPass', {pr: fmtNum(x.prem), lv: fmtNum(x.lv)})); if (x.gp) out.push(t('exPassG', {g: fmtNum(x.gp)})); } break;
     case 'box': out.push(t(x.bx === 'c' ? 'exBoxC' : x.bx === 'a' ? 'exBoxA' : 'exBoxR', {n: x.n || '?'})); break;
     case 'same': out.push(t(x.n ? 'exSameN' : 'exSame', {n: fmtNum(x.n || 1), as: BYK[x.as] ? nm(BYK[x.as]) : x.as})); break;
@@ -429,6 +527,9 @@ function explain(it) {
       break; }
     default: out.push(t('exUnknown'));
   }
+  { const pf = isF2P() ? 'lite' : st.prof;
+    if (x.max && Math.abs(x.max - p) > 0.5) out.push(t(m === 'point' ? 'exMaxPt' : 'exMax', {m: fmtNum(x.max), x: money(x.max, pf)}));
+    if (x.own) out.push(t('exOwn', {o: fmtNum(x.own), x: money(x.own, pf)})); }
   if (x.krw && !x.byprice) out.push(t('exKrw', {k: fmtCur(x.krw, 'krw', true), x: rate('krw') ? fmtCur(x.krw / rate('krw') * rate(st.cur)) : '—'}));
   if (x.buy) out.push(t('exBuy', {b: fmtNum(x.buy), x: money(x.buy, isF2P() ? 'lite' : st.prof)}));
   if (['oop', 'skill'].includes(it.c) && x.fa !== undefined) {
@@ -437,9 +538,11 @@ function explain(it) {
     else out.push(t('exFarmN', {f: fx2(x.fa)}));
   }
   if (bv.f !== 1) out.push(t('exDem', {f: fx2(bv.f)}));
-  out.push(bv.pyroOnly ? t('exPy', {p: fmtNum(bv.p)}) : t('exAp', {a: fmtNum(bv.a), r, p: fmtNum(bv.p)}));
-  if (isF2P()) out.push(t('exF2P', {a: fmtNum(bv.a), d: fmtNum(st.dailyAP), n: fmtDays(daysOf(bv.p))}));
-  else out.push(t('exCash', {p: fmtNum(bv.p), c: fmtCur(cpp()), prof: profName(st.prof), x: money(bv.p)}));
+  const u = unitOf(it), A = bv.a * u, Pp = bv.p * u;
+  if (u > 1) out.push(t('perUnit', {u: fmtNum(u)}));
+  out.push(bv.pyroOnly ? t('exPy', {p: fmtNum(Pp)}) : t('exAp', {a: fmtNum(A), r, p: fmtNum(Pp)}));
+  if (isF2P()) out.push(t('exF2P', {a: fmtNum(A), d: fmtNum(st.dailyAP), n: fmtDays(daysOf(Pp))}));
+  else out.push(t('exCash', {p: fmtNum(Pp), c: fmtCur(cpp()), prof: profName(st.prof), x: money(Pp)}));
   return out;
 }
 function srcChips(it) {
@@ -485,7 +588,7 @@ function openItem(k) {
 <div class="prof3">${rows}</div></div>`;
   } else h += `<div class="pbox"><div class="p1 nov">${esc(t('nov'))}</div></div>`;
   h += `<div class="acts"><button class="btn${fav[k] ? ' pri' : ''}" data-act="fav" data-k="${k}">${esc(fav[k] ? t('unfav') : t('fav'))}</button>
-<span class="stepper"><button data-act="dq" data-v="-1" aria-label="-">−</button><input id="dq" type="number" min="1" value="1" inputmode="numeric" aria-label="${esc(t('qty'))}"><button data-act="dq" data-v="1" aria-label="+">＋</button></span>
+<span class="stepper"><button data-act="dq" data-v="${-u}" aria-label="-">−</button><input id="dq" type="number" min="${u}" step="${u}" value="${u}" inputmode="numeric" aria-label="${esc(t('qty'))}"><button data-act="dq" data-v="${u}" aria-label="+">＋</button></span>
 <button class="btn pri" data-act="addq" data-k="${k}">＋ ${esc(t('addT'))}</button></div>`;
   h += elephBox(it);
   if (steps.length) {
@@ -507,27 +610,61 @@ function openItem(k) {
 }
 
 /* ---------------- pack page ---------------- */
-function refPerPyro(r) { return r.twd / (r.p + r.ap * ar()); }
+function refPerPyro(r) { return r.twd * regF() / (r.p + r.ap * ar()); }
+const paren = s => ['tw', 'cn', 'zh', 'jp'].includes(st.lang) ? `（${s}）` : ` (${s})`;
+const refLabel = r => { const it = r.k && BYK[r.k], a = tl('refN', r.id); return it && nm(it) !== a ? nm(it) + paren(a) : a; };
+const PARTIAL = new Set(['eleph', 'skill', 'oop', 'gear', 'grow', 'gift']);
+const needOf = p => Math.max(0, Math.min(p.q, p.need == null ? p.q : +p.need || 0));
+const lineUnit = (p, v) => p.own && v.x && v.x.own ? v.x.own : v.p;
+const pullOf = (it, v, p) => p.own ? 0 : v.x && v.x.pull != null ? v.x.pull : v.x && v.x.gp != null ? v.x.gp : it.k === 'C3' || it.c === 'tic' || (it.c === 'cur' && it.g === 'point') ? v.p : 0;
 function packCalc(items, price, cur) {
-  let tot = 0, off = 0; const parts = [];
+  let tot = 0, off = 0, pull = 0; const parts = [];
   for (const p of items) {
     const it = BYK[p.k]; if (!it) continue;
-    if (p.off) { off++; continue; }
-    const v = val(it); if (v) { tot += v.p * p.q; parts.push([it, v.p * p.q]); }
+    const nq = needOf(p); if (nq < p.q) off++;
+    const v = val(it); if (!v || !nq) continue;
+    const x = lineUnit(p, v) * nq; tot += x; parts.push([it, x]); pull += pullOf(it, v, p) * nq;
   }
   const pc = cur || st.cur, pr = parseFloat(price);
   const twd = pr > 0 && rate(pc) && rate('twd') ? pr / rate(pc) * rate('twd') : 0;
   const ratio = prof => twd ? tot * twdPP(prof) / twd : 0;
   const days = tot / ar() / Math.max(1, st.dailyAP);
-  return {tot, off, parts, twd, ratio, days, ps: twd ? twdTo(twd) : 0};
+  return {tot, off, pull, parts, twd, ratio, days, ps: twd ? twdTo(twd) : 0};
 }
 const vIdx = r => r >= 2 ? 0 : r >= 1.2 ? 1 : r >= 0.9 ? 2 : 3;
 let ratVis = true;
-if ('IntersectionObserver' in window) new IntersectionObserver(es => { ratVis = es[0].isIntersecting; $('#ratPill').classList.toggle('hide', ratVis); }, {threshold: 0.1}).observe($('#ratCard'));
+if ('IntersectionObserver' in window) new IntersectionObserver(es => { ratVis = es[0].isIntersecting; $('#ratPill').classList.toggle('hide', ratVis); }, {threshold: 0.1}).observe($('#rcBig'));
+function eligmaFor(x, q) {
+  let need = q, tot = 0;
+  for (const [lab, , cap] of x.sup || []) { if (!/^E\d$/.test(lab)) continue; const k = Math.min(need, cap); tot += k * +lab.slice(1); need -= k; if (need <= 0) break; }
+  return need > 0 ? null : tot;
+}
+const shopOf = x => { const s = (x.sup || []).find(s => s[0].startsWith('S:') && s[0] !== 'S:MasterCoin'); return s ? shopName(s[0].slice(2)) : ''; };
+function prowHTML(p, i) {
+  const it = BYK[p.k]; if (!it) return '';
+  const v = val(it), x = elephX(it), u = unitOf(it), q = p.q, nq = needOf(p), own = !!(p.own && v && v.x && v.x.own);
+  let el = '';
+  if (x && !own) {
+    if (x.h) el = `<span class="elx">⚔️ ${esc(t('elLine', {h: x.h, r: fmtNum(elRate(x.h)), d: fmtNum(Math.ceil((nq || q) / elRate(x.h) * 10) / 10, 3)}))}</span>`;
+    else {
+      const e = eligmaFor(x, nq || q), ev = BYK.I23 && val(BYK.I23), sh = shopOf(x);
+      el = `<span class="elx">⚔️ ${esc(t('elH0s'))}${e != null && ev ? ' · ' + esc(t('elElig', {n: fmtNum(e), eg: nm(BYK.I23), x: mainPrice(e * ev.p)})) : ''}${sh ? ' · ' + esc(t('elShop', {s: sh})) : ''}</span>`;
+    }
+  }
+  const head = p.opts ? `<select class="osel" data-in="popt" data-i="${i}" aria-label="${esc(t('slotT'))}">${p.opts.map(([k, qq], j) => `<option value="${j}"${j === p.oi ? ' selected' : ''}>${esc(BYK[k] ? nm(BYK[k]) : k)} ×${fmtNum(qq)}</option>`).join('')}</select>` : `<b>${esc(nm(it))}</b>`;
+  const unitTxt = v ? esc(mainPrice(lineUnit(p, v) * u)) + (u > 1 ? ' / ' + fmtNum(u) : '') : esc(t('nov'));
+  const ownBtn = v && v.x && v.x.own ? `<button class="own${own ? ' on' : ''}" data-act="own" data-i="${i}" aria-pressed="${own}">🔁 ${esc(t('ownShort'))}</button>` : '';
+  const needBtn = `<button class="need${nq > 0 ? ' on' : ''}" data-act="need" data-i="${i}" aria-pressed="${nq > 0}">${nq >= q && q > 0 ? '✓ ' : ''}${esc(t('need'))}</button>`;
+  const needCtl = q > 1 && u === 1 && PARTIAL.has(it.c) ? `<span class="needq${nq < q ? ' part' : ''}">${needBtn}<input type="number" min="0" max="${q}" step="1" inputmode="numeric" value="${nq}" data-in="pneed" data-i="${i}" aria-label="${esc(t('need'))}"><em>/${fmtNum(q)}</em></span>` : needBtn;
+  return `<div class="prow${nq === 0 ? ' off' : ''}${own ? ' owned' : ''}"><span class="av sm r${it.r || 1}">${icon(it)}</span><div class="mid"${p.opts ? '' : ` data-act="open" data-k="${it.k}"`}>${head}<small>${unitTxt}${own ? ' · ' + esc(t('ownLine')) : ''}</small>${el}</div>
+<span class="stepper sm"><button data-act="pq" data-i="${i}" data-v="${-u}" aria-label="-">−</button><input type="number" min="0" step="${u}" inputmode="numeric" value="${q}" data-in="pq" data-i="${i}" aria-label="${esc(t('qty'))}"><button data-act="pq" data-i="${i}" data-v="${u}" aria-label="+">＋</button></span>
+<span class="sub" data-sub="${i}"></span><span class="pctl">${ownBtn}${needCtl}</span><button class="rm" data-act="rm" data-i="${i}" aria-label="remove">✕</button></div>`;
+}
 function renderPack() {
   if (!DATA) return;
-  $('#st2').textContent = t('step2'); $('#st3').textContent = t('step3'); $('#st4').textContent = t('step4'); $('#stSaved').textContent = t('myPacks');
+  $('#st1').textContent = t('step1'); $('#st2').textContent = t('step2'); $('#st3').textContent = t('step3'); $('#st4').textContent = t('step4'); $('#stSaved').textContent = t('myPacks');
   $('#quickLbl').textContent = t('quick');
+  const pb = $('#pickBtn'); pb.textContent = '📦 ' + t('packPick'); pb.hidden = !officialPacks().length;
   $('#quick').innerHTML = QUICK.map(([k, q]) => BYK[k] ? `<button class="qb" data-act="add" data-k="${k}" data-q="${q}">${icon(BYK[k])} ${esc(nm(BYK[k]))}${q > 1 ? ' ×' + fmtNum(q) : ''}</button>` : '').join('');
   $('#ps').placeholder = t('addSearch');
   $('#clearPack').textContent = t('clearPack');
@@ -536,27 +673,20 @@ function renderPack() {
   $('#pCurBtn').innerHTML = `${esc((pack.cur || st.cur).toUpperCase())} <span class="car">▾</span>`;
   $('#pName').placeholder = t('nameP'); if (document.activeElement !== $('#pName')) $('#pName').value = pack.name || '';
   $('#saveBtn').textContent = t('saveT'); $('#copyBtn').textContent = t('copy');
-  $('#prows').innerHTML = pack.items.length ? pack.items.map((p, i) => {
-    const it = BYK[p.k]; if (!it) return '';
-    const v = val(it), x = elephX(it), on = !p.off;
-    let el = '';
-    if (x) el = x.h ? `<span class="elx">⚔️ ${esc(t('elLine', {h: x.h, r: fmtNum(elRate(x.h)), d: fmtNum(Math.ceil(p.q / elRate(x.h) * 10) / 10, 3)}))}</span>` : `<span class="elx">⚔️ ${esc(t('elH0s'))}</span>`;
-    return `<div class="prow${on ? '' : ' off'}"><span class="av sm r${it.r || 1}">${icon(it)}</span><div class="mid" data-act="open" data-k="${it.k}"><b>${esc(nm(it))}</b><small>${v ? esc(mainPrice(v.p * unitOf(it))) + (unitOf(it) > 1 ? ' / ' + fmtNum(unitOf(it)) : '') : esc(t('nov'))}</small>${el}</div>
-<span class="stepper sm"><button data-act="pq" data-i="${i}" data-v="-1" aria-label="-">−</button><input type="number" min="0" step="1" inputmode="numeric" value="${p.q}" data-in="pq" data-i="${i}" aria-label="${esc(t('qty'))}"><button data-act="pq" data-i="${i}" data-v="1" aria-label="+">＋</button></span>
-<span class="sub" data-sub="${i}"></span><button class="need${on ? ' on' : ''}" data-act="need" data-i="${i}" aria-pressed="${on}">${on ? '✓ ' : ''}${esc(t('need'))}</button><button class="rm" data-act="rm" data-i="${i}" aria-label="remove">✕</button></div>`;
-  }).join('') : `<p class="empty">${esc(t('packEmpty'))}</p>`;
+  $('#rcProf').innerHTML = profSeg('sm');
+  $('#prows').innerHTML = pack.items.length ? pack.items.map(prowHTML).join('') : `<p class="empty">${esc(t('packEmpty'))}</p>`;
   $('#needHint').textContent = pack.items.length ? t('needHint') : '';
   renderResult(); renderSaved();
 }
 function ladderHTML(R) {
-  const rows = REF.map(r => ({lab: tl('refN', r.id), pp: refPerPyro(r), cls: r.id === 'half' || r.id === 'month' ? 'ref' : ''}));
+  const rows = REF.map(r => ({lab: refLabel(r), pp: refPerPyro(r), cls: r.id === 'half' || r.id === 'month' ? 'ref' : ''}));
   if (R.twd && R.tot > 0) rows.push({lab: '👉 ' + (pack.name || t('thisPack')), pp: R.twd / R.tot, cls: 'me'});
   rows.sort((a, b) => a.pp - b.pp);
   return `<div class="ladder">${rows.map(r => `<div class="lrow ${r.cls}"><span>${esc(r.lab)}</span><b>${esc(fmtCur(twdTo(r.pp), st.cur))}/💎</b></div>`).join('')}</div>`;
 }
 function renderResult() {
   const L = Ln();
-  pack.items.forEach((p, i) => { const it = BYK[p.k]; const s = document.querySelector(`[data-sub="${i}"]`); if (it && s) { const v = val(it); s.textContent = v ? mainPrice(v.p * p.q) : '—'; } });
+  pack.items.forEach((p, i) => { const it = BYK[p.k]; const s = document.querySelector(`[data-sub="${i}"]`); if (it && s) { const v = val(it); s.textContent = v ? mainPrice(lineUnit(p, v) * needOf(p)) : '—'; } });
   const R = packCalc(pack.items, pack.price, pack.cur);
   /* ① profile + ratio card */
   let big = '', others = '';
@@ -569,15 +699,18 @@ function renderResult() {
     const r = R.ratio(st.prof), k = vIdx(r);
     big = `<div class="rbig v${k}"><small>${esc(t('ratioOf', {p: profName(st.prof)}))}</small><b>${r.toFixed(2)}×</b><strong>${esc(L.verdict[k])}</strong></div>`;
     others = [...oth.filter(p => p !== st.prof)].map(p => `${PICON[p]} ${profName(p)} ${R.ratio(p).toFixed(2)}×`).join(' · ') + ` · 🐢 ${t('dayS', {d: fmtDays(R.days)})}`;
-  } else big = `<div class="rbig none">${esc(R.tot > 0 ? t('needPrice') : t('packEmpty2'))}</div>`;
-  $('#ratCard').innerHTML = `<div class="rc-h"><h3>${esc(t('step1'))}</h3><button class="info" data-act="profinfo" aria-label="info">ⓘ</button></div>
-<div class="rc-b">${profSeg('sm')}${big}</div>${others ? `<p class="rc-o">${esc(others)}</p>` : ''}`;
+  } else big = `<div class="rbig none">${esc(R.tot > 0 ? t('needPrice') : pack.items.length ? t('zeroVal') : t('packEmpty2'))}</div>`;
+  $('#rcBig').innerHTML = big;
+  const ro = $('#rcOth'); ro.textContent = others; ro.hidden = !others;
+  const pn = $('#priceNote'); pn.textContent = pack.conv ? '⚠️ ' + t('krwNote') : ''; pn.hidden = !pack.conv;
+  $('#rcAnc').innerHTML = ancNote();
   /* ④ details */
   let h = '';
   if (R.twd && R.tot > 0 && !isF2P()) {
     const r = R.ratio(st.prof), pos = Math.min(r, 3) / 3 * 100;
     h += `<div class="gauge"><div class="zn z3" style="width:30%">${esc(L.zones[0])}</div><div class="zn z2" style="width:10%">${esc(L.zones[1])}</div><div class="zn z1" style="width:26.67%">${esc(L.zones[2])}</div><div class="zn z0" style="width:33.33%">${esc(L.zones[3])}</div><i class="needle" style="left:${pos}%"></i></div>
 <p class="rtxt">${esc(t('resultTxt', {v: money(R.tot), p: fmtCur(R.ps), r: fmtNum(r)}))}</p>`;
+    if (R.pull > 0 && R.pull < R.tot * 0.98) h += `<p class="rtxt pullr">🎫 ${esc(t('pullRatio', {v: money(R.pull), r: (R.pull * twdPP(st.prof) / R.twd).toFixed(2)}))}</p>`;
   }
   if (isF2P() && R.tot > 0) h += `<p class="rtxt">${esc(t('f2pTxt', {ap: fmtNum(apOf(R.tot)), d: fmtDays(R.days), da: fmtNum(st.dailyAP)}))}</p>`;
   h += `<div class="kv"><span>${esc(t('total'))}</span><b>${esc(isF2P() ? fmtNum(apOf(R.tot)) + ' AP' : money(R.tot))}${!isF2P() && c2on() ? ` <small>${esc(fmtCur(R.tot * cpp(st.cur2), st.cur2))}</small>` : ''}</b></div>
@@ -597,7 +730,7 @@ function renderResult() {
   if (page() === 'pack' && R.tot > 0 && (isF2P() || R.twd)) {
     const r = isF2P() ? null : R.ratio(st.prof);
     pill.className = 'on ' + (isF2P() ? 'f2p' : 'v' + vIdx(r)) + hide;
-    pill.textContent = isF2P() ? '🐢 ' + t('dayS', {d: fmtDays(R.days)}) : PICON[st.prof] + ' ' + r.toFixed(2) + '×';
+    pill.innerHTML = isF2P() ? `<b>🐢 ${esc(t('dayS', {d: fmtDays(R.days)}))}</b><span>${esc(fmtNum(apOf(R.tot)) + ' AP')}</span>` : `<b>${PICON[st.prof]} ${r.toFixed(2)}×</b><span>${esc(L.verdict[vIdx(r)])} · ${esc(fmtCur(R.ps))}</span>`;
   } else pill.className = '';
 }
 function renderSaved() {
@@ -617,8 +750,8 @@ function copyText() {
   const R = packCalc(pack.items, pack.price, pack.cur), L = Ln();
   const lines = [pack.name ? `【${pack.name}】` : '', `${PICON[st.prof]} ${profName(st.prof)}`];
   if (R.twd) lines.push(`${t('price')}: ${fmtCur(R.ps)} | ${t('total')}: ${money(R.tot, isF2P() ? 'lite' : st.prof)} | ` + PROFS.filter(p => p !== 'f2p').map(p => `${profName(p)} ${R.ratio(p).toFixed(2)}×`).join(' / ') + (isF2P() ? '' : ` ${L.verdict[vIdx(R.ratio(st.prof))]}`));
-  lines.push(`🐢 ${fmtNum(apOf(R.tot))} AP ≈ ${t('dayS', {d: fmtDays(R.days)})}`);
-  for (const p of pack.items) { const it = BYK[p.k]; if (!it) continue; const v = val(it); lines.push(`- ${nm(it)} ×${p.q}${p.off ? ' (' + t('needOff') + ')' : ''} = ${v ? mainPrice(v.p * p.q) : t('nov')}`); }
+  lines.push(`🐢 ${fmtNum(apOf(R.tot))} AP · ${t('dayS', {d: fmtDays(R.days)})}`);
+  for (const p of pack.items) { const it = BYK[p.k]; if (!it) continue; const v = val(it), nq = needOf(p); lines.push(`- ${nm(it)} ×${fmtNum(p.q)}${nq < p.q ? ' (' + t('needOff') + (nq ? ' ' + fmtNum(p.q - nq) : '') + ')' : ''}${p.own ? ' (' + t('ownShort') + ')' : ''} = ${v ? mainPrice(lineUnit(p, v) * nq) : t('nov')}`); }
   return lines.filter(Boolean).join('\n');
 }
 
@@ -630,9 +763,14 @@ function profInfoHTML() {
 <h4>${esc(t('iosT'))}</h4><div class="iosw"><table class="itab"><thead><tr><th>${esc(t('colPack'))}</th><th>${esc(t('colGet'))}</th><th>${esc(t('colPrice'))}</th><th>${esc(t('colPer'))}</th></tr></thead><tbody>${rows}</tbody></table></div>
 <p class="hint">${esc(t('iosNote'))}</p>`;
 }
+function anchorCtl() {
+  const on = +st.aPrice > 0, c = st.aCur || st.cur;
+  return `<label class="lbl">${esc(t('anchorT'))}</label><div class="pricerow sm"><input type="number" min="0" step="any" inputmode="decimal" data-in="aPrice" value="${on ? st.aPrice : ''}" placeholder="${esc(fmtNum(twdTo(230, c)))}" aria-label="${esc(t('anchorT'))}"><button class="pick" data-act="curpick" data-v="aCur">${esc(c.toUpperCase())} ▾</button></div>
+<p class="hint">${esc(on ? t('anchorOn', {f: fx2(regF())}) : t('anchorHint2'))}</p>${on ? `<div class="presets"><button class="btn sm" data-act="aclear">${esc(t('anchorClear'))}</button></div>` : ''}`;
+}
 function openProfInfo() {
   openSheet(`<div class="shh"><div class="sht"><h3>ⓘ ${esc(t('profInfo'))}</h3></div><button class="x" data-act="close" aria-label="close">✕</button></div>${profInfoHTML()}
-<label class="lbl">${esc(t('dailyAP'))}</label>${dailyCtl()}<label class="lbl">${esc(t('camp'))}</label>${campSeg()}
+${anchorCtl()}<label class="lbl">${esc(t('dailyAP'))}</label>${dailyCtl()}<label class="lbl">${esc(t('camp'))}</label>${campSeg()}
 <div class="sfoot"><button class="btn pri wide" data-act="close">${esc(t('done'))}</button></div>`, 'info');
 }
 function dailyCtl() {
@@ -654,7 +792,7 @@ function renderHelp() {
 <div class="card faq">${L.faq.map(([q, ans], i) => `<details${i === 0 ? ' open' : ''}><summary>${esc(fill(q))}</summary><p>${esc(fill(ans))}</p></details>`).join('')}</div>
 <div class="card"><details><summary>${esc(t('advT'))}</summary><p class="mu">${esc(t('anchors', {cr: fmtNum(a.creditPerAP), ex: fmtNum(a.expPerAP), we: fmtNum(a.wexpPerAP), el: fmtNum(a.elephAP), b: m.built}))}</p>
 <h4>${esc(t('coinsT'))}</h4>${coins}<p class="mu">${esc(t('coinNote'))}</p></details></div>
-<p class="foot">${esc(t('srcList'))}<br>${esc(t('commList'))}<br>${esc(t('disclaimer'))}</p>`;
+<p class="foot">FM Archive v${VER} · ${esc(m.built || '')}<br>${esc(t('srcList'))}<br>${esc(t('commList'))}<br>${esc(t('disclaimer'))}</p>`;
 }
 
 /* ---------------- sheets ---------------- */
@@ -668,6 +806,7 @@ function openSettings() {
 <div class="two"><div><label class="lbl">${esc(t('cur'))}</label><button class="pick" data-act="curpick" data-v="cur">${esc(st.cur.toUpperCase())} ${esc(curName(st.cur))} ▾</button></div>
 <div><label class="lbl">${esc(t('cur2'))}</label><button class="pick" data-act="curpick" data-v="cur2">${st.cur2 ? esc(st.cur2.toUpperCase() + ' ' + curName(st.cur2)) : esc(t('none'))} ▾</button></div></div>
 <label class="lbl">${esc(t('profT'))}</label>${profSeg('sm')}
+${anchorCtl()}
 <label class="lbl">${esc(t('dailyAP'))}</label>${dailyCtl()}
 <label class="lbl">${esc(t('camp'))}</label>${campSeg()}
 <h4>${esc(t('secLook'))}</h4>
@@ -689,6 +828,7 @@ function openSettings() {
 <h4>${esc(t('secData'))}</h4>
 <div class="btns"><button class="btn" data-act="clearCustom">${esc(t('clearCustom', {n: Object.keys(custom).length}))}</button><button class="btn" data-act="clearFav">${esc(t('clearFav', {n: Object.keys(fav).length}))}</button>
 <button class="btn" data-act="guide">${esc(t('showGuide'))}</button><button class="btn danger" data-act="resetAll">${esc(t('resetAll'))}</button></div>
+<p class="foot">FM Archive v${VER}</p>
 <div class="sfoot"><button class="btn pri wide" data-act="close">${esc(t('done'))}</button></div>`;
   openSheet(h, 'settings');
 }
@@ -698,9 +838,9 @@ function openLang() {
 }
 let curFrom = '';
 function openCur(target) {
-  curFrom = sheetKind === 'settings' ? 'settings' : '';
+  curFrom = sheetKind === 'settings' || sheetKind === 'info' ? sheetKind : '';
   curTarget = target;
-  const sel = target === 'price' ? (pack.cur || st.cur) : st[target];
+  const sel = target === 'price' ? (pack.cur || st.cur) : target === 'aCur' ? (st.aCur || st.cur) : st[target];
   openSheet(`<div class="shh"><div class="sht"><h3>💱 ${esc(t(target === 'cur2' ? 'cur2' : 'cur'))}</h3></div><button class="x" data-act="close" aria-label="close">✕</button></div>
 <input id="curQ" type="search" placeholder="${esc(t('curSearch'))}" aria-label="${esc(t('curSearch'))}"><div id="curList" class="plist cur"></div>`, 'cur');
   renderCurList(sel);
@@ -752,7 +892,7 @@ const ACT = {
   fav: el => { const k = el.dataset.k; if (fav[k]) { delete fav[k]; toast(t('favRemoved')); } else { fav[k] = 1; toast(t('favAdded')); } persist(); renderList(); if (sheetKind.startsWith('item:')) openItem(k); },
   add: el => addToPack(el.dataset.k, +(el.dataset.q || 1)),
   addq: el => { const q = Math.max(1, parseInt($('#dq').value) || 1); addToPack(el.dataset.k, q); },
-  dq: el => { const i = $('#dq'); i.value = Math.max(1, (parseInt(i.value) || 1) + +el.dataset.v); },
+  dq: el => { const i = $('#dq'), d = +el.dataset.v, s = Math.abs(d) || 1; i.value = Math.max(s, (parseInt(i.value) || s) + d); },
   cat: el => { st.cat = el.dataset.v; $('#q').value = ''; persist(); renderList(); },
   grp: el => {
     const c = st.cat, gs = groupsOf(c), g = el.dataset.v;
@@ -767,7 +907,13 @@ const ACT = {
   prof: el => { st.prof = el.dataset.v; persist(); renderAll(); },
   profinfo: () => openProfInfo(),
   daily: el => { st.dailyAP = +el.dataset.v; persist(); renderAll(); },
-  need: el => { const p = pack.items[+el.dataset.i]; if (!p) return; p.off = p.off ? 0 : 1; persist(); renderPack(); },
+  need: el => { const p = pack.items[+el.dataset.i]; if (!p) return; p.need = needOf(p) > 0 ? 0 : null; persist(); renderPack(); },
+  own: el => { const p = pack.items[+el.dataset.i]; if (!p) return; p.own = p.own ? 0 : 1; persist(); renderPack(); },
+  tog: el => { const k = el.dataset.k; st[k] = st[k] ? 0 : 1; persist(); renderAll(); },
+  aclear: () => { st.aPrice = 0; persist(); renderAll(); },
+  pickpack: () => openPackPicker(),
+  ppick: el => loadOfficial(el.dataset.v),
+  ppcat: el => { ppCat = el.dataset.v; renderPackList(); },
   toTop: () => { const r = $('#ratCard'); if (r) r.scrollIntoView({behavior: 'smooth', block: 'start'}); },
   close: () => closeSheet(),
   settings: () => openSettings(),
@@ -779,9 +925,10 @@ const ACT = {
     if (curTarget === 'price') { pack.cur = v; persist(); closeSheet(); renderPack(); return; }
     if (curTarget === 'cur') { st.cur = v; st.curManual = true; }
     else if (curTarget === 'cCur') st.cCur = v || 'twd';
+    else if (curTarget === 'aCur') st.aCur = v || st.cur;
     else st[curTarget] = v;
     persist(); closeSheet(); renderAll();
-    if (curFrom === 'settings') openSettings();
+    if (curFrom === 'settings') openSettings(); else if (curFrom === 'info') openProfInfo();
   },
   set: el => { const k = el.dataset.k; let v = el.dataset.v; if (k === 'region' || k === 'camp') v = +v; if (k === 'view') st.viewManual = 1; st[k] = v; persist(); renderAll(); },
   apP: el => { st.apRate = +el.dataset.v; persist(); renderAll(); },
@@ -792,14 +939,14 @@ const ACT = {
   gnext: () => gStep < 2 ? showGuide(gStep + 1) : endGuide(),
   gskip: () => endGuide(),
   cclear: el => { delete custom[el.dataset.k]; persist(); renderList(); renderPack(); openItem(el.dataset.k); },
-  pq: el => { const i = +el.dataset.i; const p = pack.items[i]; if (!p) return; p.q = Math.max(0, p.q + +el.dataset.v); persist(); renderPack(); },
+  pq: el => { const i = +el.dataset.i; const p = pack.items[i]; if (!p) return; p.q = Math.max(0, p.q + +el.dataset.v); if (p.need != null && p.need >= p.q) p.need = null; persist(); renderPack(); },
   rm: el => { pack.items.splice(+el.dataset.i, 1); persist(); renderPack(); renderChrome(); },
   pcur: () => openCur('price'),
   save: () => { const name = $('#pName').value.trim() || ('#' + (saved.list.length + 1)); pack.name = name; saved.list.unshift({name, items: pack.items.map(x => ({...x})), price: pack.price, cur: pack.cur || st.cur, date: Date.now()}); saved.list = saved.list.slice(0, 30); persist(); renderSaved(); toast(t('savedT')); },
-  sload: el => { const s = saved.list[+el.dataset.i]; if (!s) return; pack.items = s.items.map(x => ({...x})); pack.price = s.price; pack.cur = s.cur; pack.name = s.name; persist(); renderPack(); renderChrome(); scrollTo({top: 0, behavior: 'smooth'}); },
+  sload: el => { const s = saved.list[+el.dataset.i]; if (!s) return; pack.items = s.items.map(x => ({...x})); pack.price = s.price; pack.cur = s.cur; pack.name = s.name; pack.conv = 0; persist(); renderPack(); renderChrome(); scrollTo({top: 0, behavior: 'smooth'}); },
   sdel: el => { saved.list.splice(+el.dataset.i, 1); persist(); renderSaved(); },
   copy: async () => { try { await navigator.clipboard.writeText(copyText()); toast(t('copied')); } catch (e) { openSheet(`<div class="shh"><div class="sht"><h3>${esc(t('copy'))}</h3></div><button class="x" data-act="close" aria-label="close">✕</button></div><textarea class="copybox" readonly>${esc(copyText())}</textarea>`, 'copy'); } },
-  clearPack: () => { pack.items = []; pack.price = ''; pack.name = ''; pack.cur = ''; persist(); renderPack(); renderChrome(); },
+  clearPack: () => { pack.items = []; pack.price = ''; pack.name = ''; pack.cur = ''; pack.conv = 0; persist(); renderPack(); renderChrome(); },
   pickadd: el => { addToPack(el.dataset.k, 1); $('#ps').value = ''; $('#pres').innerHTML = ''; },
 };
 document.addEventListener('click', e => {
@@ -811,19 +958,23 @@ let qT = 0;
 document.addEventListener('input', e => {
   const el = e.target;
   if (el.id === 'q') { clearTimeout(qT); qT = setTimeout(renderList, 120); return; }
-  if (el.id === 'curQ') return renderCurList(curTarget === 'price' ? (pack.cur || st.cur) : st[curTarget]);
-  if (el.id === 'pPrice') { pack.price = el.value; if (!pack.cur && el.value) pack.cur = st.cur; persist(); return renderResult(); }  // pin the currency the price was typed in
+  if (el.id === 'curQ') return renderCurList(curTarget === 'price' ? (pack.cur || st.cur) : curTarget === 'aCur' ? (st.aCur || st.cur) : st[curTarget]);
+  if (el.id === 'ppQ') return renderPackList();
+  if (el.id === 'pPrice') { pack.price = el.value; pack.conv = 0; if (!pack.cur && el.value) pack.cur = st.cur; persist(); return renderResult(); }  // pin the currency the price was typed in
   if (el.id === 'pName') { pack.name = el.value; persist(); return; }
   if (el.id === 'ps') return renderPS();
   const k = el.dataset.in; if (!k) return;
-  if (k === 'pq') { const p = pack.items[+el.dataset.i]; if (p) { p.q = Math.max(0, parseInt(el.value) || 0); persist(); renderResult(); } }
+  if (k === 'pq') { const p = pack.items[+el.dataset.i]; if (p) { p.q = Math.max(0, parseInt(el.value) || 0); if (p.need != null && p.need >= p.q) p.need = null; persist(); renderResult(); } }
+  if (k === 'pneed') { const p = pack.items[+el.dataset.i]; if (p) { const n = Math.max(0, parseInt(el.value) || 0); p.need = n >= p.q ? null : n; persist(); renderResult(); } }
 });
 document.addEventListener('change', e => {
   const el = e.target, k = el.dataset.in; if (!k) return;
   const num = (v, d) => { const x = parseFloat(v); return isFinite(x) && x >= 0 ? x : d; };
   if (k === 'sort') { st.sort = +el.value; persist(); return renderList(); }
   if (k === 'col') { st.cols[el.dataset.k] = el.checked ? 1 : 0; persist(); renderList(); return; }
-  if (k === 'pq') { const p = pack.items[+el.dataset.i]; if (p) el.value = p.q; renderPack(); return; }
+  if (k === 'pq' || k === 'pneed') { renderPack(); return; }
+  if (k === 'popt') { const p = pack.items[+el.dataset.i]; if (p && p.opts) { const j = +el.value, o = p.opts[j]; if (o) { p.oi = j; p.k = o[0]; p.q = o[1]; p.need = null; p.own = 0; } } persist(); renderPack(); return; }
+  if (k === 'aPrice') { const x = parseFloat(el.value); st.aPrice = x > 0 ? x : 0; if (!st.aCur) st.aCur = st.cur; }
   if (k === 'dailyAP') { st.dailyAP = Math.max(1, Math.round(num(el.value, DEF.dailyAP))) || DEF.dailyAP; }
   if (k === 'apRate') { const x = num(el.value, DEF.apRate); st.apRate = x > 0 ? x : DEF.apRate; }
   if (k === 'cAmt') { st.cAmt = num(el.value, DEF.cAmt) || DEF.cAmt; }
@@ -844,10 +995,57 @@ $('#sheetWrap .backdrop').addEventListener('click', closeSheet);
 addEventListener('hashchange', () => { route(); scrollTo(0, 0); });
 function renderPS() {
   const q = $('#ps').value.trim().toLowerCase();
-  $('#pres').innerHTML = q ? DATA.items.filter(it => inRegion(it) && it.s.includes(q)).slice(0, 8).map(it => {
+  const S = q ? searchItems(q, shown) : null;
+  $('#pres').innerHTML = q ? S.txt.concat(S.extra).slice(0, 8).map(it => {
     const v = val(it);
     return `<button data-act="pickadd" data-k="${it.k}"><span class="av sm r${it.r || 1}">${icon(it)}</span><span class="mid"><b>${esc(nm(it))}</b><small>${esc(catLabel(it.c))}</small></span><span>${v ? esc(mainPrice(v.p * unitOf(it))) : ''}</span></button>`;
   }).join('') : '';
+}
+
+/* ---------------- official packs ---------------- */
+let ppCat = '';
+const TODAY = new Date().toISOString().slice(0, 10);
+const officialPacks = () => ((DATA && DATA.meta.packs) || []).filter(P => (P.items || []).some(([k]) => BYK[k]) || (P.sel || []).some(o => o.some(([k]) => BYK[k])));
+const packNm = P => (P.n && (P.n[li()] || P.n[3] || P.n[0])) || ('#' + P.id);
+function packPriceTWD(P) { if (P.twd) return +P.twd; const kr = rate('krw'), tw = rate('twd'); return P.krw && kr && tw ? P.krw / kr * tw : 0; }
+function bestOpt(opts) { let bi = 0, bv = -1; opts.forEach(([k, q], j) => { const v = BYK[k] && val(BYK[k]); const x = v ? v.p * q : 0; if (x > bv) { bv = x; bi = j; } }); return bi; }
+function packLines(P) {
+  const lines = (P.items || []).filter(([k]) => BYK[k]).map(([k, q]) => ({k, q}));
+  for (const o0 of P.sel || []) { const opts = o0.filter(([k]) => BYK[k]); if (!opts.length) continue; const j = bestOpt(opts); lines.push({k: opts[j][0], q: opts[j][1], opts, oi: j}); }
+  return lines;
+}
+function openPackPicker() {
+  openSheet(`<div class="shh"><div class="sht"><h3>📦 ${esc(t('packPickT'))}</h3><small>${esc(t('packPickH'))}</small></div><button class="x" data-act="close" aria-label="close">✕</button></div>
+<input id="ppQ" type="search" placeholder="${esc(t('packPickS'))}" aria-label="${esc(t('packPickS'))}" autocomplete="off"><div class="chips pp" id="ppCats"></div><div id="ppList" class="pplist"></div>`, 'packs');
+  renderPackList();
+}
+function renderPackList() {
+  if (!$('#ppList')) return;
+  const all = officialPacks(), q = ($('#ppQ') ? $('#ppQ').value : '').trim().toLowerCase(), pf = isF2P() ? 'lite' : st.prof;
+  const cats = [...new Set(all.map(P => P.cat || 'other'))];
+  if (ppCat && !cats.includes(ppCat)) ppCat = '';
+  $('#ppCats').innerHTML = [['', t('allT')], ...cats.map(c => [c, tl('pcats', c) === c ? tl('pcats', 'other') : tl('pcats', c)])].map(([c, lab]) => `<button class="chip${ppCat === c ? ' on' : ''}" data-act="ppcat" data-v="${esc(c)}">${esc(lab)}</button>`).join('');
+  const rows = all.filter(P => (!ppCat || (P.cat || 'other') === ppCat) && (!q || (P.n || []).join(' ').toLowerCase().includes(q) || packLines(P).some(l => BYK[l.k].s.includes(q)))).map(P => {
+    const lines = packLines(P), R = packCalc(lines, packPriceTWD(P), 'twd');
+    return {P, lines, R, r: R.twd && R.tot ? R.ratio(pf) : 0};
+  }).sort((a, b) => ((b.P.on || [])[1] >= TODAY) - ((a.P.on || [])[1] >= TODAY) || b.r - a.r);
+  $('#ppList').innerHTML = rows.length ? rows.slice(0, 150).map(({P, lines, R, r}) => {
+    const k = R.twd && R.tot ? vIdx(r) : -1;
+    const price = P.twd ? fmtCur(+P.twd, 'twd', true) : P.krw ? fmtCur(P.krw, 'krw', true) + (R.twd && st.cur !== 'krw' ? ' ≈ ' + fmtCur(twdTo(R.twd)) : '') : '—';
+    const sum = lines.slice(0, 4).map(l => nm(BYK[l.k]) + ' ×' + fmtNum(l.q)).join('、') + (lines.length > 4 ? '…' : '');
+    const on = P.on || [], av = on[1] && on[1] < TODAY ? `<span class="tag col">${esc(t('offSale'))}</span>` : on[1] && on[1] < '2090' ? `<span class="tag">${esc(t('onTill', {d: on[1]}))}</span>` : on[0] ? `<span class="tag">${esc(t('onSale'))}</span>` : '';
+    return `<button class="ppr" data-act="ppick" data-v="${esc(String(P.id))}"><span class="mid"><b>${esc(packNm(P))}</b><small>${esc(sum)}</small><small class="ppp">${esc(price)}${P.twd ? '' : ' · ' + esc(t('krwShort'))}${P.lim ? ' · ' + esc(t('limT', {n: P.lim})) : ''} ${av}</small></span>${k >= 0 ? `<span class="rpill v${k}">${PICON[pf]} ${r.toFixed(2)}×</span>` : '<span></span>'}</button>`;
+  }).join('') : `<p class="empty">${esc(t('noResult'))}</p>`;
+}
+function curDigits(c) { try { return new Intl.NumberFormat('en', {style: 'currency', currency: c.toUpperCase()}).resolvedOptions().maximumFractionDigits; } catch (e) { return 2; } }
+function loadOfficial(id) {
+  const P = officialPacks().find(x => String(x.id) === String(id)); if (!P) return;
+  pack.items = packLines(P);
+  if (P.twd) { pack.price = String(+P.twd); pack.cur = 'twd'; pack.conv = 0; }
+  else { const tw = packPriceTWD(P), c = st.cur, x = tw ? twdTo(tw, c) : 0; pack.price = x ? String(x >= 100 ? Math.round(x) : +x.toFixed(curDigits(c))) : ''; pack.cur = c; pack.conv = x ? 1 : 0; }
+  pack.name = packNm(P);
+  persist(); closeSheet(); renderPack(); renderChrome(); toast(t('loaded', {n: pack.name}));
+  const r = $('#ratCard'); if (r) r.scrollIntoView({block: 'start'});
 }
 
 /* ---------------- exchange rates ---------------- */
@@ -865,9 +1063,11 @@ if (!st.cur) st.cur = DEF_CUR[st.lang];
 if (!PROFS.includes(st.prof) && st.prof !== 'custom') st.prof = DEF.prof;
 if (!st.viewManual && window.innerWidth >= 1024) st.view = 'table';
 if (!st.open || typeof st.open !== 'object') st.open = {};
+if (st.open.oop && !st.open.oop.includes('all')) delete st.open.oop;
+for (const L0 of [pack.items, ...saved.list.map(s => s.items)]) for (const p of L0 || []) if (p.off) { p.need = 0; delete p.off; }
 applyLook(); route(); renderChrome();
 try {
-  const r = await fetch('data.json'); DATA = await r.json();
+  const r = await fetch('data.json?v=' + VER); DATA = await r.json();
   DATA.items.forEach((it, i) => { it.s = it.n.join(' ').toLowerCase(); it.i = i; BYK[it.k] = it; });
   DATA.meta.events = DATA.meta.events || {};
   FX = {date: DATA.fx.date, usd: DATA.fx.usd, live: false};
